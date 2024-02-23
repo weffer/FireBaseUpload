@@ -6,15 +6,22 @@ admin.initializeApp({
   credential: admin.credential.cert(serviceAccount)
 });
 const firestore = admin.firestore();
-const settings = {timestampsInSnapshots: true};
+const settings = { timestampsInSnapshots: true };
 firestore.settings(settings);
-if (data && (typeof data === "object")) {
-Object.keys(data).forEach(docKey => {
-  console.log(docKey);
- firestore.collection(collectionKey).doc(docKey).set(data[docKey]).then((res) => {
-    console.log("Document " + docKey + " successfully written!");
-}).catch((error) => {
-   console.error("Error writing document: ", error);
-});
-});
+
+if (data && typeof data === "object") {
+  Object.keys(data).forEach(async docKey => {
+    try {
+      const docRef = firestore.collection(collectionKey).doc();
+      const docId = docRef.id;
+
+      // Agregar el ID del documento como un campo en el JSON
+      const newData = { ...data[docKey], id: docId };
+
+      await docRef.set(newData);
+      console.log("Document " + docId + " successfully written!");
+    } catch (error) {
+      console.error("Error writing document: ", error);
+    }
+  });
 }
